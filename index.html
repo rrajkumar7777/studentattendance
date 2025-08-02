@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #2575fc;
+            display: none;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .result-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .percentage {
+            color: #2575fc;
+            font-size: 24px;
+        }
+        
+        .present {
+            color: #28a745;
+        }
+        
+        .absent {
+            color: #dc3545;
+        }
+        
+        .error {
+            color: #dc3545;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .warning {
+            color: #856404;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Attendance Calculator</h1>
+        
+        <div class="input-group">
+            <label for="totalDays">Total Days</label>
+            <input type="number" id="totalDays" min="0" placeholder="Enter total number of days">
+        </div>
+        
+        <div class="input-group">
+            <label for="presentDays">Days Present</label>
+            <input type="number" id="presentDays" min="0" placeholder="Enter number of days present">
+        </div>
+        
+        <div class="input-group">
+            <label for="absentDays">Days Absent</label>
+            <input type="number" id="absentDays" min="0" placeholder="Enter number of days absent">
+        </div>
+        
+        <button id="calculateBtn">Calculate Attendance</button>
+        
+        <div class="error" id="errorMessage"></div>
+        <div class="warning" id="warningMessage"></div>
+        
+        <div class="result" id="resultContainer">
+            <div class="result-item">
+                <span class="result-label">Attendance Percentage:</span>
+                <span class="result-value percentage" id="attendancePercentage">0%</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Days Present:</span>
+                <span class="result-value present" id="displayPresent">0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Days Absent:</span>
+                <span class="result-value absent" id="displayAbsent">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            // Get input values
+            const totalDays = parseFloat(document.getElementById('totalDays').value);
+            const presentDays = parseFloat(document.getElementById('presentDays').value);
+            const absentDays = parseFloat(document.getElementById('absentDays').value);
+            
+            // Reset messages
+            const errorElement = document.getElementById('errorMessage');
+            const warningElement = document.getElementById('warningMessage');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            errorElement.style.display = 'none';
+            warningElement.style.display = 'none';
+            resultContainer.style.display = 'none';
+            
+            // Validation
+            if (isNaN(totalDays) || isNaN(presentDays) || isNaN(absentDays)) {
+                errorElement.textContent = 'Please enter valid numbers in all fields';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (totalDays <= 0) {
+                errorElement.textContent = 'Total days must be greater than zero';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (presentDays < 0 || absentDays < 0) {
+                errorElement.textContent = 'Days present and absent cannot be negative';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            // Check for data consistency
+            if (presentDays + absentDays !== totalDays) {
+                warningElement.textContent = 'Warning: Total days does not match the sum of present and absent days';
+                warningElement.style.display = 'block';
+            }
+            
+            // Calculate attendance percentage
+            const attendancePercentage = (presentDays / totalDays) * 100;
+            
+            // Display results
+            document.getElementById('attendancePercentage').textContent = attendancePercentage.toFixed(2) + '%';
+            document.getElementById('displayPresent').textContent = presentDays;
+            document.getElementById('displayAbsent').textContent = absentDays;
+            
+            resultContainer.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
